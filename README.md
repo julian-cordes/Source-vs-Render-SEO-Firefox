@@ -2,7 +2,7 @@
 
 Firefox WebExtension for checking how JavaScript rendering changes SEO-relevant signals.
 
-Current version: **1.1.1**
+Current version: **1.0.0**
 
 **Source vs Render SEO** compares the raw HTML source of a page with the rendered DOM and shows whether JavaScript changed important SEO fields such as canonical, meta robots, title, meta description, H1s, or hreflangs.
 
@@ -150,11 +150,9 @@ There are no analytics, no tracking scripts, no remote logging, and no third-par
 
 ## Changelog
 
-### 1.1.1
+### 1.0.0
 
-- Fixed toolbar icon logic so canonical/meta robots changes only count as indexability changes when effective indexability changes.
-- Added regression test page for pages where JavaScript adds explicit index signals while the page remains indexable.
-- Added a dedicated hreflang comparison test page.
+- Initial Firefox WebExtension release.
 
 ## License
 
