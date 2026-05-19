@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>10 Source Title Without Index Signals</title>
+  <meta name="description" content="Stable description.">
+  <style>body{font-family:system-ui,sans-serif;margin:32px;line-height:1.45}table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}code,pre{background:#f3f3f3;padding:2px 4px;border-radius:3px}pre{padding:10px}</style>
+</head>
+<body>
+  <h1>Stable H1</h1>
+  <h2>Expected icon state</h2>
+  <p><strong>indexable-content-diff</strong> - source and rendered are both indexable; JS only makes the index signals explicit and changes the title.</p>
+
+  <h2>Expected data</h2>
+  <table>
+    <tr><th>Field</th><th>Source</th><th>JS change</th><th>Rendered</th></tr>
+    <tr><td>Title</td><td>10 Source Title Without Index Signals</td><td>changed</td><td>10 Rendered Title With Explicit Index Signals</td></tr>
+    <tr><td>Description</td><td>Stable description.</td><td>none</td><td>Stable description.</td></tr>
+    <tr><td>Robots</td><td>not set</td><td>added</td><td>index,follow</td></tr>
+    <tr><td>Canonical</td><td>not set</td><td>added</td><td>self</td></tr>
+    <tr><td>H1</td><td>Stable H1</td><td>none</td><td>Stable H1</td></tr>
+  </table>
+
+  <h2>Rendered DOM now</h2>
+  <pre id="actual"></pre>
+  <script>
+    document.title = '10 Rendered Title With Explicit Index Signals';
+
+    const robots = document.createElement('meta');
+    robots.name = 'robots';
+    robots.content = 'index,follow';
+    document.head.appendChild(robots);
+
+    const canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    canonical.href = window.location.href;
+    document.head.appendChild(canonical);
+
+    document.getElementById('actual').textContent = JSON.stringify({
+      title: document.title,
+      description: document.querySelector('meta[name="description"]').content,
+      robots: document.querySelector('meta[name="robots"]')?.content ?? null,
+      canonical: document.querySelector('link[rel="canonical"]')?.href ?? null,
+      h1: document.querySelector('h1').textContent
+    }, null, 2);
+  </script>
+</body>
+</html>

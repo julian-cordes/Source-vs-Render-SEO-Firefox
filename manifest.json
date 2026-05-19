@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extensionName__",
+  "version": "1.1.1",
+  "description": "__MSG_extensionDescription__",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "src/background/service-worker.js"
+    ],
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/content/content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "__MSG_extensionName__",
+    "default_icon": {
+      "16": "icons/status/indexable-no-js-diff-16.png",
+      "48": "icons/status/indexable-no-js-diff-48.png",
+      "96": "icons/status/indexable-no-js-diff-96.png",
+      "128": "icons/status/indexable-no-js-diff-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/store/source-vs-render-seo-16.png",
+    "48": "icons/store/source-vs-render-seo-48.png",
+    "128": "icons/store/source-vs-render-seo-128.png"
+  },
+  "default_locale": "en",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "source-vs-render-seo@example.com",
+      "strict_min_version": "121.0"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

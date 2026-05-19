@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>08 Source Title</title>
+  <meta name="description" content="Source description.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="./08-not-indexable-content-index-diff.html">
+  <style>body{font-family:system-ui,sans-serif;margin:32px;line-height:1.45}table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px 8px;text-align:left}code,pre{background:#f3f3f3;padding:2px 4px;border-radius:3px}pre{padding:10px}</style>
+</head>
+<body>
+  <h1>Source H1</h1>
+  <h2>Expected icon state</h2>
+  <p><strong>not-indexable-content-index-diff</strong> - not indexable, content and indexability change by JS.</p>
+
+  <h2>Expected data</h2>
+  <table>
+    <tr><th>Field</th><th>Source</th><th>JS change</th><th>Rendered</th></tr>
+    <tr><td>Title</td><td>08 Source Title</td><td>changed</td><td>08 Rendered Title</td></tr>
+    <tr><td>Description</td><td>Source description.</td><td>changed</td><td>Rendered description.</td></tr>
+    <tr><td>Robots</td><td>index,follow</td><td>changed</td><td>noindex,follow</td></tr>
+    <tr><td>Canonical</td><td>self</td><td>none</td><td>self</td></tr>
+    <tr><td>H1</td><td>Source H1</td><td>changed</td><td>Rendered H1</td></tr>
+  </table>
+
+  <h2>Rendered DOM now</h2>
+  <pre id="actual"></pre>
+  <script>
+    document.title = '08 Rendered Title';
+    document.querySelector('meta[name="description"]').setAttribute('content', 'Rendered description.');
+    document.querySelector('meta[name="robots"]').setAttribute('content', 'noindex,follow');
+    document.querySelector('h1').textContent = 'Rendered H1';
+    document.getElementById('actual').textContent = JSON.stringify({
+      title: document.title,
+      description: document.querySelector('meta[name="description"]').content,
+      robots: document.querySelector('meta[name="robots"]').content,
+      canonical: document.querySelector('link[rel="canonical"]').href,
+      h1: document.querySelector('h1').textContent
+    }, null, 2);
+  </script>
+</body>
+</html>

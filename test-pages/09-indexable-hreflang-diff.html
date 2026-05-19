@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>09 Hreflang Source Title</title>
+  <meta name="description" content="Stable description.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="./09-indexable-hreflang-diff.html">
+  <link rel="alternate" hreflang="de" href="/de/source-hreflang.html">
+  <link rel="alternate" hreflang="en" href="/en/source-hreflang.html">
+  <style>body{font-family:system-ui,sans-serif;margin:32px;line-height:1.45}table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}code,pre{background:#f3f3f3;padding:2px 4px;border-radius:3px}pre{padding:10px}</style>
+</head>
+<body>
+  <h1>Stable H1</h1>
+  <h2>Expected icon state</h2>
+  <p><strong>indexable-content-diff</strong> - indexable, hreflang content change by JS.</p>
+
+  <h2>Expected data</h2>
+  <table>
+    <tr><th>Field</th><th>Source</th><th>JS change</th><th>Rendered</th></tr>
+    <tr><td>Title</td><td>09 Hreflang Source Title</td><td>none</td><td>09 Hreflang Source Title</td></tr>
+    <tr><td>Description</td><td>Stable description.</td><td>none</td><td>Stable description.</td></tr>
+    <tr><td>Robots</td><td>index,follow</td><td>none</td><td>index,follow</td></tr>
+    <tr><td>Canonical</td><td>self</td><td>none</td><td>self</td></tr>
+    <tr><td>H1</td><td>Stable H1</td><td>none</td><td>Stable H1</td></tr>
+    <tr><td>Hreflang de</td><td>/de/source-hreflang.html</td><td>changed</td><td>/de/rendered-hreflang.html</td></tr>
+    <tr><td>Hreflang en</td><td>/en/source-hreflang.html</td><td>none</td><td>/en/source-hreflang.html</td></tr>
+    <tr><td>Hreflang fr</td><td>not set</td><td>added</td><td>/fr/rendered-hreflang.html</td></tr>
+  </table>
+
+  <h2>Rendered DOM now</h2>
+  <pre id="actual"></pre>
+  <script>
+    document.querySelector('link[hreflang="de"]').setAttribute('href', '/de/rendered-hreflang.html');
+
+    const fr = document.createElement('link');
+    fr.rel = 'alternate';
+    fr.hreflang = 'fr';
+    fr.setAttribute('href', '/fr/rendered-hreflang.html');
+    document.head.appendChild(fr);
+
+    document.getElementById('actual').textContent = JSON.stringify({
+      title: document.title,
+      description: document.querySelector('meta[name="description"]').content,
+      robots: document.querySelector('meta[name="robots"]').content,
+      canonical: document.querySelector('link[rel="canonical"]').href,
+      h1: document.querySelector('h1').textContent,
+      hreflangs: Array.from(document.querySelectorAll('link[rel="alternate"][hreflang]')).map((link) => ({
+        lang: link.getAttribute('hreflang'),
+        href: link.getAttribute('href')
+      }))
+    }, null, 2);
+  </script>
+</body>
+</html>

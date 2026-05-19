@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>05 Not Indexable No JS Diff</title>
+  <meta name="description" content="Stable description.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="canonical" href="./05-not-indexable-no-js-diff.html">
+  <style>body{font-family:system-ui,sans-serif;margin:32px;line-height:1.45}table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px 8px;text-align:left}code,pre{background:#f3f3f3;padding:2px 4px;border-radius:3px}pre{padding:10px}</style>
+</head>
+<body>
+  <h1>Stable H1</h1>
+  <h2>Expected icon state</h2>
+  <p><strong>not-indexable-no-js-diff</strong> - not indexable, no JS change.</p>
+
+  <h2>Expected data</h2>
+  <table>
+    <tr><th>Field</th><th>Source</th><th>JS change</th><th>Rendered</th></tr>
+    <tr><td>Title</td><td>05 Not Indexable No JS Diff</td><td>none</td><td>05 Not Indexable No JS Diff</td></tr>
+    <tr><td>Description</td><td>Stable description.</td><td>none</td><td>Stable description.</td></tr>
+    <tr><td>Robots</td><td>noindex,follow</td><td>none</td><td>noindex,follow</td></tr>
+    <tr><td>Canonical</td><td>self</td><td>none</td><td>self</td></tr>
+    <tr><td>H1</td><td>Stable H1</td><td>none</td><td>Stable H1</td></tr>
+  </table>
+
+  <h2>Rendered DOM now</h2>
+  <pre id="actual"></pre>
+  <script>
+    document.getElementById('actual').textContent = JSON.stringify({
+      title: document.title,
+      description: document.querySelector('meta[name="description"]').content,
+      robots: document.querySelector('meta[name="robots"]').content,
+      canonical: document.querySelector('link[rel="canonical"]').href,
+      h1: document.querySelector('h1').textContent
+    }, null, 2);
+  </script>
+</body>
+</html>

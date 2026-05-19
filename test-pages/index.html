@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Source vs Render SEO Testset</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 32px; line-height: 1.45; }
+    h1 { margin-bottom: 8px; }
+    li { margin: 8px 0; }
+    code { background: #f2f2f2; padding: 2px 4px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Source vs Render SEO Testset</h1>
+  <p>Open each page and check the extension icon after the page has loaded.</p>
+
+  <ol>
+    <li><a href="01-indexable-no-js-diff.html">Indexable, no JS diff</a></li>
+    <li><a href="02-indexable-content-diff.html">Indexable, content diff</a></li>
+    <li><a href="03-indexable-index-diff.html">Indexable, index diff</a> <code>canonical fixed by JS</code></li>
+    <li><a href="04-indexable-content-index-diff.html">Indexable, content + index diff</a> <code>robots fixed by JS</code></li>
+    <li><a href="05-not-indexable-no-js-diff.html">Not indexable, no JS diff</a></li>
+    <li><a href="06-not-indexable-content-diff.html">Not indexable, content diff</a></li>
+    <li><a href="07-not-indexable-index-diff.html">Not indexable, index diff</a> <code>canonical changed by JS</code></li>
+    <li><a href="08-not-indexable-content-index-diff.html">Not indexable, content + index diff</a> <code>robots changed by JS</code></li>
+    <li><a href="09-indexable-hreflang-diff.html">Indexable, hreflang diff</a> <code>hreflang changed by JS</code></li>
+    <li><a href="10-indexable-added-index-signals-title-diff.html">Indexable, added index signals + title diff</a> <code>robots/canonical added by JS, title changed</code></li>
+  </ol>
+</body>
+</html>
+

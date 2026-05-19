@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Source vs Render SEO",
+    "description": "Extension name shown in Chrome."
+  },
+  "extensionDescription": {
+    "message": "Compares raw HTML vs. rendered DOM for SEO fields and shows indexability/rendering changes in the icon.",
+    "description": "Extension description shown in Chrome."
+  }
+}
