@@ -14,7 +14,13 @@ Then open:
 http://localhost:8080/test-pages/
 ```
 
-When opening the files directly via `file://`, enable `Allow access to file URLs` on the extension card in `chrome://extensions`.
+For Firefox, serve these files over local HTTP instead of opening them directly via `file://`:
+
+```bash
+python -m http.server 8080
+```
+
+Then open `http://localhost:8080/test-pages/`.
 
 Reload the Chrome extension after code changes, then reload each test page.
 

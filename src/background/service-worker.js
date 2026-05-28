@@ -27,7 +27,7 @@ const ICON_PATHS = {
 
 const CONTENT_DIFF_FIELDS = ['title', 'metaDescription', 'h1s', 'hreflangs'];
 const LOADING_ICON_PATH = ICON_PATHS['indexable-no-js-diff'];
-const ANALYSIS_VERSION = 'firefox-background-v1';
+const ANALYSIS_VERSION = 'firefox-background-v7';
 const ANALYSIS_MODE_KEY = 'seoInspectorAnalysisMode';
 const ANALYSIS_MODES = {
   COMPARE: 'compare',
@@ -122,6 +122,7 @@ async function analyzeTab(tabId, url, requestedMode) {
   const analysisToken = beginAnalysis(tabId);
   const analysisMode = normalizeAnalysisMode(requestedMode ?? await getAnalysisMode());
   const needsSource = analysisMode !== ANALYSIS_MODES.RENDERED;
+  const needsHttpStatus = isHttpUrl(url);
   const needsRendered = analysisMode !== ANALYSIS_MODES.HTML;
 
   let httpStatus = null;
@@ -129,23 +130,29 @@ async function analyzeTab(tabId, url, requestedMode) {
   let renderedFields = null;
   let analysisState = 'ok'; // ok | source_unavailable | rendered_unavailable | partial | both_unavailable
 
-  // 1. Fetch raw HTML + HTTP status
-  if (needsSource) {
+  // 1. Fetch HTTP status and, when needed, raw HTML
+  if (needsHttpStatus || needsSource) {
     try {
       const resp = await fetch(url, { cache: 'no-cache' });
       httpStatus = resp.status;
-      const html = await resp.text();
-      sourceFields = await parseRawHtml(html);
+      if (needsSource) {
+        const html = await resp.text();
+        sourceFields = await parseRawHtml(html);
+      }
     } catch (err) {
       console.warn('[Source vs Render SEO] fetch failed:', err.message);
-      analysisState = 'source_unavailable';
+      if (needsSource) {
+        analysisState = 'source_unavailable';
+      }
     }
   }
 
   // 2. Get rendered DOM from content script
   if (needsRendered) {
     try {
-      renderedFields = await getRenderedFields(tabId);
+      const renderedData = await getRenderedData(tabId);
+      renderedFields = renderedData.fields;
+      httpStatus = httpStatus ?? renderedData.httpStatus;
     } catch (err) {
       console.warn('[Source vs Render SEO] content script failed:', err.message);
       if (analysisState === 'source_unavailable') {
@@ -167,6 +174,7 @@ async function analyzeTab(tabId, url, requestedMode) {
   const iconState = getIconStateForAnalysis({
     analysisMode,
     analysisState,
+    httpStatus,
     url,
     sourceFields,
     renderedFields,
@@ -267,7 +275,7 @@ async function parseRawHtml(html) {
 // Content script: get rendered fields
 // ---------------------------------------------------------------------------
 
-async function getRenderedFields(tabId) {
+async function getRenderedData(tabId) {
   try {
     return await sendMessageToTab(tabId);
   } catch {
@@ -286,7 +294,10 @@ function sendMessageToTab(tabId) {
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else if (resp && resp.ok) {
-        resolve(resp.fields);
+        resolve({
+          fields: resp.fields,
+          httpStatus: typeof resp.httpStatus === 'number' ? resp.httpStatus : null,
+        });
       } else {
         reject(new Error('no response'));
       }
@@ -309,7 +320,7 @@ function isCurrentAnalysis(tabId, token) {
 }
 
 function applyIcon(tabId, result) {
-  if (result.analysisState === 'ok' && result.iconState) {
+  if (result.iconState) {
     const iconKey = result.iconState;
     return setIcon(tabId, ICON_PATHS[iconKey]);
   }
@@ -334,35 +345,17 @@ async function setIcon(tabId, iconPath) {
 }
 
 function setActionIcon(tabId, path) {
-  return new Promise((resolve, reject) => {
-    chrome.action.setIcon({ tabId, path }, () => {
-      const err = chrome.runtime.lastError;
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve();
-      }
-    });
-  });
+  return browserApi.action.setIcon({ tabId, path });
 }
 
 function setActionBadgeText(tabId, text) {
-  return new Promise((resolve, reject) => {
-    chrome.action.setBadgeText({ tabId, text }, () => {
-      const err = chrome.runtime.lastError;
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve();
-      }
-    });
-  });
+  return browserApi.action.setBadgeText({ tabId, text });
 }
 
 function getStatusIconKey(result) {
   const contentDiff = hasAnyFieldDiff(result.comparison, CONTENT_DIFF_FIELDS);
-  const sourceIndexable = isPageIndexable(result.sourceFields, result.url);
-  const renderedIndexable = isPageIndexable(result.renderedFields, result.url);
+  const sourceIndexable = isResultIndexable(result.sourceFields, result.url, result.httpStatus);
+  const renderedIndexable = isResultIndexable(result.renderedFields, result.url, result.httpStatus);
   const indexabilityDiff = sourceIndexable !== renderedIndexable;
   const indexabilityPrefix = sourceIndexable ? 'indexable' : 'not-indexable';
 
@@ -373,6 +366,10 @@ function getStatusIconKey(result) {
 }
 
 function getIconStateForAnalysis(result) {
+  if (!isIndexableHttpStatus(result.httpStatus)) {
+    return getHttpStatusIconKey(result);
+  }
+
   if (result.analysisState !== 'ok') return null;
 
   if (result.analysisMode === ANALYSIS_MODES.COMPARE && result.comparison && result.renderedFields) {
@@ -380,18 +377,24 @@ function getIconStateForAnalysis(result) {
   }
 
   if (result.analysisMode === ANALYSIS_MODES.HTML && result.sourceFields) {
-    return getIndexabilityOnlyIconKey(result.sourceFields, result.url);
+    return getIndexabilityOnlyIconKey(result.sourceFields, result.url, result.httpStatus);
   }
 
   if (result.analysisMode === ANALYSIS_MODES.RENDERED && result.renderedFields) {
-    return getIndexabilityOnlyIconKey(result.renderedFields, result.url);
+    return getIndexabilityOnlyIconKey(result.renderedFields, result.url, result.httpStatus);
   }
 
   return null;
 }
 
-function getIndexabilityOnlyIconKey(fields, url) {
-  const indexable = isPageIndexable(fields, url);
+function getHttpStatusIconKey(result) {
+  const contentDiff = result.analysisMode === ANALYSIS_MODES.COMPARE
+    && hasAnyFieldDiff(result.comparison, CONTENT_DIFF_FIELDS);
+  return contentDiff ? 'not-indexable-content-diff' : 'not-indexable-no-js-diff';
+}
+
+function getIndexabilityOnlyIconKey(fields, url, httpStatus) {
+  const indexable = isResultIndexable(fields, url, httpStatus);
   return `${indexable ? 'indexable' : 'not-indexable'}-no-js-diff`;
 }
 
@@ -402,6 +405,14 @@ function hasAnyFieldDiff(comparison, fields) {
 function isPageIndexable(fields, pageUrl) {
   if (!fields) return false;
   return !hasNoindexDirective(fields.metaRobots) && hasSelfReferencingCanonical(fields.canonical, pageUrl);
+}
+
+function isIndexableHttpStatus(status) {
+  return status === null || (status >= 200 && status < 400);
+}
+
+function isResultIndexable(fields, pageUrl, httpStatus) {
+  return isIndexableHttpStatus(httpStatus) && isPageIndexable(fields, pageUrl);
 }
 
 function hasNoindexDirective(metaRobots) {
@@ -452,6 +463,10 @@ function normalizeAnalysisMode(mode) {
 
 function isAnalyzableUrl(url) {
   return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('file://');
+}
+
+function isHttpUrl(url) {
+  return url.startsWith('http://') || url.startsWith('https://');
 }
 
 function isTrustedExtensionSender(sender) {

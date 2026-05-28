@@ -179,7 +179,7 @@ function renderAnalysisNotice(data) {
   const text = div('analysis-notice__text');
 
   if (data.url?.startsWith('file://') && data.analysisState === 'source_unavailable') {
-    text.textContent = 'Raw HTML source may be unavailable for file:// pages. Enable file URL access for the extension or use a local HTTP server.';
+    text.textContent = 'Firefox cannot reliably read raw HTML source from file:// pages. Serve the page over local HTTP and reload it.';
   } else if (data.analysisState === 'source_unavailable') {
     text.textContent = 'Raw HTML source could not be fetched. Rendered DOM data may still be available.';
   } else if (data.analysisState === 'rendered_unavailable') {

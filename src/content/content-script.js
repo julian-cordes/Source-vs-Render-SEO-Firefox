@@ -13,7 +13,7 @@
     if (msg.type !== 'GET_RENDERED_SEO') return false;
 
     const fields = extractFromDocument(document);
-    sendResponse({ ok: true, fields });
+    sendResponse({ ok: true, fields, httpStatus: getDocumentHttpStatus() });
     return false;
   });
 
@@ -52,5 +52,15 @@
       h1s: getH1s(),
       hreflangs: getHreflangs(),
     };
+  }
+
+  function getDocumentHttpStatus() {
+    try {
+      const navigation = performance.getEntriesByType('navigation')[0];
+      const status = navigation?.responseStatus;
+      return typeof status === 'number' && status > 0 ? status : null;
+    } catch {
+      return null;
+    }
   }
 })();

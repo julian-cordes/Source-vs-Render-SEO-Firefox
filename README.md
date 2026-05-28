@@ -2,7 +2,7 @@
 
 Firefox WebExtension for checking how JavaScript rendering changes SEO-relevant signals.
 
-Current version: **1.0.0**
+Current version: **1.1.2**
 
 **Source vs Render SEO** compares the raw HTML source of a page with the rendered DOM and shows whether JavaScript changed important SEO fields such as canonical, meta robots, title, meta description, H1s, or hreflangs.
 
@@ -85,18 +85,6 @@ There is no build step.
 4. Select this project's `manifest.json`.
 5. Reload the extension after changing files.
 
-For local regression checks, serving `test-pages/` over HTTP is the most reliable path:
-
-```bash
-python -m http.server 8080
-```
-
-Then visit `http://localhost:8080/test-pages/`.
-
-## Test Pages
-
-The `test-pages/` directory contains minimal HTML files for all toolbar icon states plus focused regression cases for hreflang changes and explicit index signals added by JavaScript without changing effective indexability.
-
 ## Project Structure
 
 ```text
@@ -111,8 +99,6 @@ src/
   popup/popup.css
   popup/popup.js
   shared/seo-fields.js
-test-pages/
-  manual test pages
 ```
 
 ## How It Works
@@ -149,6 +135,11 @@ The extension only analyzes the page you are currently visiting. Results are sto
 There are no analytics, no tracking scripts, no remote logging, and no third-party services.
 
 ## Changelog
+
+### 1.1.2
+
+- Fixed Firefox toolbar icon handling for HTTP error pages: 4xx/5xx pages now show a not-indexable icon while the popup Index/No Index box remains based on meta robots and canonical only.
+- Added a Firefox-specific HTTP status fallback from the rendered page context.
 
 ### 1.0.0
 
